@@ -16,7 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from permissions.views import active_users
+from django.http import JsonResponse
+from permissions import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+def home(request):
+    return JsonResponse({"message":"Добро пожаловать в API!"})
 
 urlpatterns = [
+    path('api/token/', TokenObtainPairView.as_view(),name='token_obtain_pair'),
+    path('api/token/refresh/',TokenRefreshView.as_view(),name='token_refresh'),
     path('admin/', admin.site.urls),
+    path('active-users/',active_users, name="active_users"),
+    path('',home,name="home"),
+    path('admin-users/',views.admin_users,name="admin_users"),
+    path('example-users/',views.example_users,name="example_users"),
+    path('recent-users/',views.recent_users,name="recent_users"),
+    path('managers-or-users/',views.managers_or_users,name="managers_or_users"),
+    path('user-access-rules/',views.user_access_rules, name="user_access_rules"),
 ]

@@ -10,6 +10,14 @@ class User(models.Model):
     is_active = models.BooleanField(default=True)
 
     role = models.ForeignKey('Role',on_delete=models.SET_NULL, null=True)
+    businesselement = models.ForeignKey(
+        "BusinessElement",
+        on_delete=models.CASCADE,
+        blank = True,
+        null = True,
+        related_name="users"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def set_password(self, raw_password):
         self.password_hash= make_password(raw_password)
@@ -32,8 +40,13 @@ class Role(models.Model):
         return self.name
 
 class BusinessElement(models.Model):
-    name = models.CharField(max_length=100,unique=True)
-    owner = models.ForeignKey('User',on_delete=models.CASCADE,null=True,blank=True)
+    owner = models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        related_name="owned_elements",
+        null = True,
+        blank = True
+    )
 
     def __str__(self):
         return self.name
