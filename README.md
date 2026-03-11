@@ -2,6 +2,11 @@
 Кастомная система аутентификации авторизации в Django с ролями и правилами доступа.
 Проект реализует регистрацию и вход пользователей, управление профилем, гибкую систему прав доступа,основываясь на роли и бизнес-объекты.
 
+
+
+
+
+
 ## Основные возможности
 - Регистрация и вход пользователей (JWT-аутентификация).
 - Управление профилем (просмотр, обновление, мягкое удаление).
@@ -9,6 +14,11 @@
 - Бизнес-объекты (users,products,orders).
 - Таблица правил доступа (CRUD-права для каждой роли и объекта).
 - Мягкое удаление пользователей через 'is_active=False'
+
+
+
+
+
 
 # Database Schema
 
@@ -21,13 +31,33 @@
 -password_hash (string,bcrypt)
 -is_active (bool,default=True)
 
+
+
+
+
+
 ## Roles
 -id (PK,int)
 -name(string,unique)
 
+
+
+
+
+
+
+
 ## BusinessElements
 -id (PK,int)
 -name (string,unique)
+
+
+
+
+
+
+
+
 
 ## AccessRoleRules
 -id(PK,int)
@@ -40,11 +70,29 @@
 -delete_permission(bool)
 -delete_all_permission(bool)
 
+
+
+
+
+
+
+
 ## JWT
 -id(PK,int)
 -user_id(FK->Users.id)
 -token(string,jwt)
 -expire_at(datetime)
+
+
+
+
+
+
+
+
+
+
+
 
 ## API Endpoints
 
@@ -68,6 +116,9 @@
    "user_id" : 1
 }
 
+
+
+
 -POST /login
 Вход в систему, возвращает JWT-токен.
 **Request:**
@@ -85,6 +136,9 @@
    "expire_at": "2026-03-09:03:00"
 }
 
+
+
+
 -POST /logout
 Выход из системы, токен недействителен.
 **Request:**
@@ -94,6 +148,9 @@ Authorization: Bearer <jwt_token>
 {
    "message" : "Logged out successfully"
 }
+
+
+
 
 -GET /profile
 Получение информации о пользователе.
@@ -108,6 +165,9 @@ Authorization: Bearer <jwt_token>
   "email" : "example@exam.com",
   "is_active" : true
 }
+
+
+
 
 -PUT /profile
 Обновление данных профиля.
@@ -127,6 +187,10 @@ Authorization: Bearer <jwt_token>
    "message" : "Profile updated successfully"
 }
 
+
+
+
+
 -DELETE /profile
 Удаление аккаунта (is_active=False)
 **Request:**
@@ -136,3 +200,32 @@ Authorization: Bearer <jwt_token>
 {
    "message" : "Profile deleted successfully"
 }
+
+
+
+
+
+
+Users
+
+- GET /users/active/ — список активных пользователей
+- GET /users/admin/ — список администраторов
+- GET /users/example/ — пользователи с email @example.com
+- GET /users/recent/ — пользователи, созданные за последние 7 дней
+- GET /users/managers-or-users/ — менеджеры или обычные пользователи
+- GET /users/access-rules/ — правила для роли User
+
+
+
+Access Rules
+- GET /access-rules/ — просмотр правил доступа (только Admin)
+
+
+
+
+Авторизация
+
+-User доступ к Orders                              Нет прав на создание, обновление и удаление.
+-Manager доступ к своим пользователям              Не может управлять всеми пользователями системы
+-Admin полный доступ включая /access-rules/        Нет ограничениий
+-Guest только регистрация и логин                  Нет доступа к защищенным эндпоинтам
