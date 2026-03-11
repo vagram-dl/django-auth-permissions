@@ -24,6 +24,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from permissions.views import (
+    RegisterView, LoginView, ProfileView, LogoutView,
+    UpdateUserView,DeleteUserView,AccessRuleView,
+    active_users,admin_users,example_users,
+    recent_users, managers_or_users, user_access_rules
+)
+
 def home(request):
     return JsonResponse({"message":"Добро пожаловать в API!"})
 
@@ -38,4 +45,16 @@ urlpatterns = [
     path('recent-users/',views.recent_users,name="recent_users"),
     path('managers-or-users/',views.managers_or_users,name="managers_or_users"),
     path('user-access-rules/',views.user_access_rules, name="user_access_rules"),
+    path('register/',RegisterView.as_view(), name = 'register'),
+    path('login/',LoginView.as_view(),name='login'),
+    path('profile/',ProfileView.as_view(),name='profile'),
+    path('logout/',LogoutView.as_view(),name='logout'),
+    path('update/',UpdateUserView.as_view(),name='update_user'),
+    path('delete/', DeleteUserView.as_view(), name='delete_user'),
+    path('access-rules/', AccessRuleView.as_view(),name = 'access_rules'),
+    path('users/active/', active_users, name = 'active_users'),
+    path('users/admin/',admin_users, name = 'admin_users'),
+    path('users/example',example_users, name = 'example_users'),
+    path('users/managers-or-users/', managers_or_users, name = 'managers_or_users'),
+    path('users/access-rules/',user_access_rules, name = 'user-access-rules'),
 ]
