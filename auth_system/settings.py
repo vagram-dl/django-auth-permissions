@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import sys
 from pathlib import Path
 
 from django.conf.global_settings import AUTH_USER_MODEL
@@ -95,6 +95,12 @@ DATABASES = {
         'PORT' : '3306',
     }
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE' : 'django.db.backends.sqlite3',
+        'NAME' : ':memory:',
+    }
 
 
 # Password validation
