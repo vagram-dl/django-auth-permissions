@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate
 import jwt
 from django.conf import settings
 
-from permissions.models import User, AccessRoleRule
+from permissions.models import User, AccessRoleRule,JWT
 from .serializers import RegisterSerializer,UserSerializer,LoginSerializer
 
 class RegisterView(generics.CreateAPIView):
@@ -33,7 +33,10 @@ class LoginView(APIView):
         payload = {"user_id" : user.id}
         token = jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
 
-        return Response({"token" : token, "email" : user.email})
+        expire_at = timezone.now() + timedelta(hours=1)
+        JWT.objects.create(user=user, token=token, expire_at=expire_at)
+
+        return Response({"token" : token, "email" : user.email,"expire_at" : expire_at})
 
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
@@ -62,7 +65,8 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self,request):
-        return Response({"message":"Logged out successfully"}, status = status.HTTP_200_OK)
+        JWT.objects.filter(user=request.user).delete()
+        return Response({"message" : "Logged out successfully"},status=status.HTTP_200_OK)
 
 class AccessRuleView(APIView):
     permission_classes = [IsAuthenticated]
