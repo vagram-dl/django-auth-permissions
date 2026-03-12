@@ -1,5 +1,31 @@
 from django.core.management.base import BaseCommand
-from permissions.models import User, BusinessElement, AccessRoleRule, Role
+from permissions.models import User, BusinessElement, AccessRoleRule, Role,JWT
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    model = User
+    list_display = ("email","first_name","last_name","is_staff","is_active")
+    list_filter = ("is_staff", "is_active","role")
+    search_fields = ("email","first_name","last_name")
+    ordering = ("email",)
+
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Personal info", {"fields": ("first_name", "last_name", "role")}),
+        ("Permissions", {"fields": ("is_staff", "is_active", "is_superuser", "groups", "user_permissions")}),
+    )
+    add_fieldsets = (
+        (None, {
+            "classes": ("wide",),
+            "fields": ("email", "first_name", "last_name", "role", "password1", "password2", "is_staff", "is_active"),
+        }),
+    )
+admin.site.register(Role)
+admin.site.register(BusinessElement)
+admin.site.register(AccessRoleRule)
+admin.site.register(JWT)
 
 class Command(BaseCommand):
     help = "Заполняет базу тестовыми данными"

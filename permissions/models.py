@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,PermissionsMixin
 
 class UserManager(BaseUserManager):
     def create_user(self,email,password=None,**extra_fields):
@@ -20,15 +20,18 @@ class UserManager(BaseUserManager):
            raise ValueError("Суперпользователь должен иметь is_staff=True.")
        if extra_fields.get('is_superuser') is not True:
            raise ValueError("Суперпользователь должен иметь is_superuser=True.")
+       return self.create_user(email,password,**extra_fields)
 
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser,PermissionsMixin):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     patronymic = models.CharField(max_length=50,blank=True,null=True)
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
 
     role = models.ForeignKey('Role',on_delete=models.SET_NULL,null=True)
     businesselement = models.ForeignKey(
@@ -41,7 +44,7 @@ class User(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name,last_name']
+    REQUIRED_FIELDS = ['first_name','last_name']
 
     objects = UserManager()
 
@@ -63,6 +66,7 @@ class Role(models.Model):
         return self.name
 
 class BusinessElement(models.Model):
+    name = models.CharField(max_length=100)
     owner = models.ForeignKey(
         "User",
         on_delete=models.CASCADE,
