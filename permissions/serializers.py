@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from permissions.models import User
+from permissions.models import User, AccessRoleRule
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -26,3 +26,16 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+class AccessRoleRuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AccessRoleRule
+        fields = [
+            "id",
+            "role",
+            "element",
+            "read_permission",
+            "create_permission",
+            "update_permission",
+            "delete_permission"
+        ]

@@ -1,3 +1,4 @@
+from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.renderers import JSONRenderer
@@ -15,6 +16,9 @@ from django.conf import settings
 
 from permissions.models import User, AccessRoleRule,JWT
 from .serializers import RegisterSerializer,UserSerializer,LoginSerializer
+from rest_framework import viewsets, permissions
+from permissions.models import AccessRoleRule
+from .serializers import AccessRoleRuleSerializer
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -114,6 +118,31 @@ def user_access_rules(request):
     rules = AccessRoleRule.objects.filter(role__name="User",element__name="Orders",read_permission=True)
     data = [{"role":r.role.name, "element" : r.element.name, "can_read" : r.read_permission} for r in rules]
     return JsonResponse(data,safe=False)
+
+class AccessRoleRuleViewSet(viewsets.ModelViewSet):
+    queryset = AccessRoleRule.objects.all()
+    serializer_class = AccessRoleRuleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if self.queryset.user.role.name == "Admin":
+            return AccessRoleRule.objects.all()
+        return AccessRoleRule.objects.none()
+
+    def perform_create(self, serializer):
+        if self.request.user.role.name != "Admin":
+            return Response({"error" : "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if self.request.user.role.name != "Admin":
+            return Response({"error" : "Forbidden"},status=status.HTTP_403_FORBIDDEN)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if self.request.user.role.name != "Admin":
+            return Response({"error" : "Forbidden"}, status = status.HTTP_403_FORBIDDEN)
+        instance.delete()
 
 
 # Create your views here.

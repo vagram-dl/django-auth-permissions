@@ -5,10 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91592544-ce39-4d79-896a-e6d789435dc5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/permissions/tests/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/permissions/tests/test_auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auth_system/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth_system/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth_system/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth_system/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/permissions/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/permissions/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/permissions/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/permissions/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,13 +34,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Python tests in test_auth.py.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Python tests in test_auth.py.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

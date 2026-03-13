@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from permissions.views import active_users
 from django.http import JsonResponse
 from permissions import views
@@ -23,6 +23,8 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from rest_framework.routers import DefaultRouter
+from permissions.views import AccessRoleRuleViewSet
 
 from permissions.views import (
     RegisterView, LoginView, ProfileView, LogoutView,
@@ -33,6 +35,9 @@ from permissions.views import (
 
 def home(request):
     return JsonResponse({"message":"Добро пожаловать в API!"})
+
+router = DefaultRouter()
+router.register(r'access-rules', AccessRoleRuleViewSet, basename='access-rules')
 
 urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(),name='token_obtain_pair'),
@@ -57,4 +62,5 @@ urlpatterns = [
     path('users/example',example_users, name = 'example_users'),
     path('users/managers-or-users/', managers_or_users, name = 'managers_or_users'),
     path('users/access-rules/',user_access_rules, name = 'user-access-rules'),
+    path('',include(router.urls)),
 ]
