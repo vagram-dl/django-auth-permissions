@@ -56,7 +56,6 @@ urlpatterns = [
     path('logout/',LogoutView.as_view(),name='logout'),
     path('update/',UpdateUserView.as_view(),name='update_user'),
     path('delete/', DeleteUserView.as_view(), name='delete_user'),
-    path('access-rules/', AccessRuleView.as_view(),name = 'access_rules'),
     path('users/active/', active_users, name = 'active_users'),
     path('users/admin/',admin_users, name = 'admin_users'),
     path('users/example',example_users, name = 'example_users'),

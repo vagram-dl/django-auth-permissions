@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91592544-ce39-4d79-896a-e6d789435dc5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/permissions/tests/test_crud.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auth_system/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/auth_system/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/permissions/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/permissions/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/permissions/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/permissions/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

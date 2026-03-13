@@ -20,6 +20,7 @@ from rest_framework import viewsets, permissions
 from permissions.models import AccessRoleRule
 from .serializers import AccessRoleRuleSerializer
 
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -119,13 +120,17 @@ def user_access_rules(request):
     data = [{"role":r.role.name, "element" : r.element.name, "can_read" : r.read_permission} for r in rules]
     return JsonResponse(data,safe=False)
 
+class IsAdminRole(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role.name == "Admin"
+
 class AccessRoleRuleViewSet(viewsets.ModelViewSet):
     queryset = AccessRoleRule.objects.all()
     serializer_class = AccessRoleRuleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminRole]
 
     def get_queryset(self):
-        if self.queryset.user.role.name == "Admin":
+        if self.request.user.role.name == "Admin":
             return AccessRoleRule.objects.all()
         return AccessRoleRule.objects.none()
 
