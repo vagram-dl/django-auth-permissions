@@ -1,6 +1,7 @@
 from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import render
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.renderers import JSONRenderer
 from django.db.models import Q
 from django.utils import timezone
@@ -55,7 +56,10 @@ class UpdateUserView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        if not user.is_active:
+            raise PermissionDenied("User is deactivated")
+        return user
 
 class DeleteUserView(APIView):
     permission_classes = [IsAuthenticated]
