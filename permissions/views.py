@@ -1,3 +1,4 @@
+from rest_framework.throttling import ScopedRateThrottle
 from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -25,7 +26,15 @@ from .serializers import AccessRoleRuleSerializer
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
+
+class LoginThrottle(ScopedRateThrottle):
+    scope = 'login'
+
+
 class LoginView(APIView):
+    throttle_classes = [LoginThrottle]
+    throttle_scope = 'login'
+
     def post(self,request):
         serializer = LoginSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
@@ -123,6 +132,8 @@ def user_access_rules(request):
     rules = AccessRoleRule.objects.filter(role__name="User",element__name="Orders",read_permission=True)
     data = [{"role":r.role.name, "element" : r.element.name, "can_read" : r.read_permission} for r in rules]
     return JsonResponse(data,safe=False)
+
+
 
 class IsAdminRole(permissions.BasePermission):
     def has_permission(self, request, view):
