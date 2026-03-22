@@ -1,3 +1,4 @@
+from .services import AuthService
 from rest_framework.throttling import ScopedRateThrottle
 from django.core.serializers import serialize
 from django.http import JsonResponse
@@ -36,22 +37,11 @@ class LoginView(APIView):
     throttle_scope = 'login'
 
     def post(self,request):
-        serializer = LoginSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
-
-        user = authenticate(request,email=email,password=password)
-        if user is None or not user.is_active:
-            return Response({"error":"Invalid credentials"},status.HTTP_401_UNAUTHORIZED)
-
-        payload = {"user_id" : user.id}
-        token = jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
-
-        expire_at = timezone.now() + timedelta(hours=1)
-        JWT.objects.create(user=user, token=token, expire_at=expire_at)
-
-        return Response({"token" : token, "email" : user.email,"expire_at" : expire_at})
+        try:
+            result = AuthService.login_user(request.data)
+            return Response(result, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({"error" : str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
@@ -83,8 +73,8 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self,request):
-        JWT.objects.filter(user=request.user).delete()
-        return Response({"message" : "Logged out successfully"},status=status.HTTP_200_OK)
+        result = AuthService.logout_user(request.user)
+        return Response(result,status=status.HTTP_200_OK)
 
 class AccessRuleView(APIView):
     permission_classes = [IsAuthenticated]
