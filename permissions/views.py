@@ -26,6 +26,7 @@ from .serializers import AccessRoleRuleSerializer
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = []
 
 
 class LoginThrottle(ScopedRateThrottle):
@@ -35,6 +36,7 @@ class LoginThrottle(ScopedRateThrottle):
 class LoginView(APIView):
     throttle_classes = [LoginThrottle]
     throttle_scope = 'login'
+    permission_classes = []
 
     def post(self,request):
         try:
