@@ -22,6 +22,7 @@ from .serializers import RegisterSerializer,UserSerializer,LoginSerializer
 from rest_framework import viewsets, permissions
 from permissions.models import AccessRoleRule
 from .serializers import AccessRoleRuleSerializer
+from rest_framework.exceptions import PermissionDenied
 
 
 class RegisterView(generics.CreateAPIView):
@@ -121,39 +122,48 @@ def managers_or_users(request):
     return JsonResponse(data, safe=False)
 
 def user_access_rules(request):
-    rules = AccessRoleRule.objects.filter(role__name="User",element__name="Orders",read_permission=True)
-    data = [{"role":r.role.name, "element" : r.element.name, "can_read" : r.read_permission} for r in rules]
-    return JsonResponse(data,safe=False)
+    rules = AccessRoleRule.objects.select_related('role','element').filter(
+        role_name = "User",
+        element_name = "Orders",
+        read_permissions = True
+    )
+    data = [{
+        "role":r.role.name,
+        "element": r.element.name,
+        "can_read": r.read_permission
+    }for r in rules]
+    return JsonResponse(data, safe=False)
 
 
 
 class IsAdminRole(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role.name == "Admin"
+        user_role_name = getattr(request.user.role,'name',None)
+        return request.user.is_authenticated and user_role_name == "Admin"
 
 class AccessRoleRuleViewSet(viewsets.ModelViewSet):
-    queryset = AccessRoleRule.objects.all()
     serializer_class = AccessRoleRuleSerializer
     permission_classes = [IsAdminRole]
 
     def get_queryset(self):
-        if self.request.user.role.name == "Admin":
-            return AccessRoleRule.objects.all()
+        user_role_name = getattr(self.request.user.role,'name',None)
+        if user_role_name == "Admin":
+            return AccessRoleRule.objects.select_related('role','element').all()
         return AccessRoleRule.objects.none()
 
     def perform_create(self, serializer):
-        if self.request.user.role.name != "Admin":
-            return Response({"error" : "Forbidden"}, status=status.HTTP_403_FORBIDDEN)
+        if getattr(self.request.user.role,'name',None) != "Admin":
+            raise PermissionDenied("Forbidden")
         serializer.save()
 
     def perform_update(self, serializer):
-        if self.request.user.role.name != "Admin":
-            return Response({"error" : "Forbidden"},status=status.HTTP_403_FORBIDDEN)
+        if getattr(self.request.user.role, 'name', None) != "Admin":
+            raise PermissionDenied("Forbidden")
         serializer.save()
 
     def perform_destroy(self, instance):
-        if self.request.user.role.name != "Admin":
-            return Response({"error" : "Forbidden"}, status = status.HTTP_403_FORBIDDEN)
+        if getattr(self.request.user.role, 'name', None) != "Admin":
+            raise PermissionDenied("Forbidden")
         instance.delete()
 
 
