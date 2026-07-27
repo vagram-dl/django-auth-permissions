@@ -1,30 +1,24 @@
-from django.contrib.admin.templatetags.admin_modify import submit_row_tag
+
 
 from .services import AuthService
 from rest_framework.throttling import ScopedRateThrottle
-from django.core.serializers import serialize
 from django.http import JsonResponse
-from django.shortcuts import render
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.renderers import JSONRenderer
 from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics,status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 import jwt
 from django.conf import settings
 
-from permissions.models import User, AccessRoleRule,JWT
-from .serializers import RegisterSerializer,UserSerializer,LoginSerializer
+from permissions.models import User, AccessRoleRule, JWT
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, AccessRoleRuleSerializer
 from rest_framework import viewsets, permissions
-from permissions.models import AccessRoleRule
-from .serializers import AccessRoleRuleSerializer
-from rest_framework.exceptions import PermissionDenied
 
 
 class RegisterView(generics.CreateAPIView):
@@ -128,7 +122,7 @@ def user_access_rules(request):
     rules = AccessRoleRule.objects.select_related('role','element').filter(
         role__name = "User",
         element__name = "Orders",
-        read_permissions = True
+        read_permission = True
     )
     data = [{
         "role":r.role.name,
