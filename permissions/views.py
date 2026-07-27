@@ -1,3 +1,5 @@
+from django.contrib.admin.templatetags.admin_modify import submit_row_tag
+
 from .services import AuthService
 from rest_framework.throttling import ScopedRateThrottle
 from django.core.serializers import serialize
@@ -83,9 +85,10 @@ class AccessRuleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
-        if request.user.role.name != "Admin":
-            return Response({"error" : "Forbidden"}, status.HTTP_403_FORBIDDEN)
-        rules = AccessRoleRule.objects.all()
+        user_role_name = getattr(request.user.role,'name',None)
+        if user_role_name != "Admin":
+            return Response({"error":"Forbidden"},status = status.HTTP_403_FORBIDDEN)
+        rules = AccessRoleRule.objects.select_related('role','element').all()
         data = [{
             "role" : r.role.name,
             "element" : r.element.name,
@@ -123,8 +126,8 @@ def managers_or_users(request):
 
 def user_access_rules(request):
     rules = AccessRoleRule.objects.select_related('role','element').filter(
-        role_name = "User",
-        element_name = "Orders",
+        role__name = "User",
+        element__name = "Orders",
         read_permissions = True
     )
     data = [{
