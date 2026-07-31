@@ -93,30 +93,38 @@ class AccessRuleView(APIView):
         } for r in rules]
         return JsonResponse(data,safe=False)
 
-def active_users(request):
-    users = User.objects.filter(role__name="User",is_active=True)
-    data = [{"first_name":u.first_name, "last_name":u.last_name,"email":u.email} for u in users]
+def get_users_json(queryset):
+    data = [
+        {
+            "first_name": u.first_name,
+            "last_name": u.last_name,
+            "email": u.email
+        }
+        for u in queryset
+    ]
     return JsonResponse(data,safe=False)
 
+def active_users(request):
+    users = User.objects.filter(role__name = "User",is_active = True)
+    return get_users_json(users)
+
+
 def admin_users(request):
-    admins = User.objects.filter(role__name="Admin",is_active=True)
-    data = [{"first_name":u.first_name, "last_name" : u.last_name, "email" : u.email} for u in admins]
-    return JsonResponse(data,safe=False)
+    admins = User.objects.filter(role__name="Admin", is_active=True)
+    return get_users_json(admins)
 
 def example_users(request):
     users = User.objects.filter(email__endswith="@example.com")
-    data = [{"first_name" : u.first_name, "last_name" : u.last_name, "email" : u.email} for u in users]
-    return JsonResponse(data,safe=False)
+    return get_users_json(users)
 
 def recent_users(request):
-   users = User.objects.filter(created_at__gte=timezone.now() - timedelta(days=7))
-   data = [{"first_name": u.first_name, "last_name": u.last_name, "email": u.email} for u in users]
-   return JsonResponse(data, safe=False)
+    users = User.objects.filter(created_at__gte=timezone.now() - timedelta(days=7))
+    return get_users_json(users)
+
 
 def managers_or_users(request):
     users = User.objects.filter(Q(role__name="Manager") | Q(role__name="User"))
-    data = [{"first_name": u.first_name, "last_name": u.last_name, "email": u.email} for u in users]
-    return JsonResponse(data, safe=False)
+    return get_users_json(users)
 
 def user_access_rules(request):
     rules = AccessRoleRule.objects.select_related('role','element').filter(
