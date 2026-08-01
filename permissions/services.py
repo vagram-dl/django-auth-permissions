@@ -46,7 +46,8 @@ class AuthService:
             token = jwt.encode(payload,settings.SECRET_KEY,algorithm="HS256")
             expire_at = timezone.now() + timedelta(hours=1)
             return token, expire_at
+
+    @staticmethod
     def logout_user(user):
-        @staticmethod
         AuthService.token_repo.delete_all_for_user(user)
         return {"message" : "Logged out successfully"}
