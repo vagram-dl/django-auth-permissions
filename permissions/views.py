@@ -21,6 +21,8 @@ from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, Ac
 from rest_framework import viewsets, permissions
 
 
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = []
