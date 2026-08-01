@@ -1,231 +1,76 @@
-# django-auth-permissions
-Кастомная система аутентификации авторизации в Django с ролями и правилами доступа.
-Проект реализует регистрацию и вход пользователей, управление профилем, гибкую систему прав доступа,основываясь на роли и бизнес-объекты.
+# Django Auth & Permissions System
 
-
-
-
-
+Кастомная система аутентификации и авторизации на Django REST Framework с гибкой ролевой моделью (RBAC) и управлением правами доступа к бизнес-объектам.
 
 ## Основные возможности
-- Регистрация и вход пользователей (JWT-аутентификация).
-- Управление профилем (просмотр, обновление, мягкое удаление).
-- Система ролей (admin,manager,user,guest).
-- Бизнес-объекты (users,products,orders).
-- Таблица правил доступа (CRUD-права для каждой роли и объекта).
-- Мягкое удаление пользователей через 'is_active=False'
+- Регистрация и вход пользователей с выдачей JWT-токенов.
+- Управление профилем (просмотр, обновление, мягкое удаление через `is_active=False`).
+- Гибкая система ролей (`Admin`, `Manager`, `User`, `Guest`).
+- Детальная матрица прав доступа (CRUD-права для каждой роли относительно конкретного бизнес-объекта).
+- Rate Limiting для защиты эндпоинтов аутентификации от перебора паролей.
+- Автоматическое заполнение БД тестовыми данными одной командой (`seed_data`).
 
+## Технологический стек
+- **Backend:** Python 3.13, Django, Django REST Framework
+- **Database:** MySQL / PostgreSQL
+- **Auth:** Custom JWT implementation, `djangorestframework-simplejwt` (или кастомная логика)
+- **Testing:** Django `TestCase`, `unittest`
+- **Tools:** `python-dotenv` (для `.env`), Git
 
-
-
-
-
-# Database Schema
-
-## Users
--id (PK,int)
--first_name(string)
--last_name (string)
--patronymic (string)
--email (string,unique)
--password_hash (string,bcrypt)
--is_active (bool,default=True)
-
-
-
-
-
-
-## Roles
--id (PK,int)
--name(string,unique)
-
-
-
-
-
-
-
-
-## BusinessElements
--id (PK,int)
--name (string,unique)
-
-
-
-
-
-
-
-
-
-## AccessRoleRules
--id(PK,int)
--role_id(FK->Roles.id)
--element_id(FK->BusinessElements.id)
--read_permission(bool)
--create_permission(bool)
--update_permission(bool)
--update_all_permission(bool)
--delete_permission(bool)
--delete_all_permission(bool)
-
-
-
-
-
-
-
-
-## JWT
--id(PK,int)
--user_id(FK->Users.id)
--token(string,jwt)
--expire_at(datetime)
-
-
-
-
-
-
-
-
-
-
-
+## Структура базы данных
+- **Users:** `id`, `first_name`, `last_name`, `patronymic`, `email` (unique), `password` (hashed), `is_active`, `role_id` (FK).
+- **Roles:** `id`, `name` (unique).
+- **BusinessElements:** `id`, `name`, `owner_id` (FK -> Users).
+- **AccessRoleRules:** `id`, `role_id` (FK), `element_id` (FK), `read_permission`, `create_permission`, `update_permission`, `update_all_permission`, `delete_permission`, `delete_all_permission`.
+- **JWT:** `id`, `user_id` (FK), `token`, `expire_at`.
 
 ## API Endpoints
 
 ### Auth
--POST /register
-Регистрация нового пользователя (first_name, last_name, patronymic,email,password).
-**Request:**
-'''json
-{
-  "first_name" : "Alina",
-  "last_name" : "Ivanova",
-  "patronymic" : "Petrovna",
-  "email" : "example@exam.com",
-  "password":"securepassword"
-}
+- `POST /register/` — Регистрация нового пользователя.
+- `POST /login/` — Вход в систему, возвращает JWT-токен и время его жизни.
+- `POST /logout/` — Аннулирование JWT-токена на сервере.
 
-**Response:**
-'''json
-{
-   "message" : "User registered successfully",
-   "user_id" : 1
-}
+### Profile
+- `GET /profile/` — Получение информации о текущем пользователе.
+- `PUT /profile/` — Обновление данных профиля.
+- `DELETE /profile/` — Мягкое удаление аккаунта (`is_active=False`).
 
+### Users (Admin/Manager only)
+- `GET /users/active/` — Список активных пользователей.
+- `GET /users/admin/` — Список администраторов.
+- `GET /users/recent/` — Пользователи, зарегистрированные за последние 7 дней.
+- `GET /users/managers-or-users/` — Фильтрация по нескольким ролям.
 
+### Access Rules
+- `GET /access-rules/` — Просмотр полной матрицы прав доступа (только `Admin`).
 
+## Модель авторизации (RBAC)
+ Роль|Доступ к Orders|Доступ к Users |Доступ к /access-rules/ 
 
--POST /login
-Вход в систему, возвращает JWT-токен.
-**Request:**
-'''json
-{
-   "email": "example@exam.com",
-  "password": "securepassword"
-}
+| **Guest** | Нет | Только регистрация/логин | Нет |
+| **User** | Чтение (свои) | Нет | Нет |
+| **Manager**| Чтение/Обновление (свои) | Управление своими | Нет |
+| **Admin** | Полный CRUD | Полный CRUD | **Да** |
 
-**Response:**
-'''json
-{
-   "access_token":"<jwt_token>",
-   "token_type" : "bearer",
-   "expire_at": "2026-03-09:03:00"
-}
+## Эволюция проекта (Changelog)
+Этот проект проходит постоянный рефакторинг для соответствия лучшим практикам разработки:
+- **v1.0:** Базовая реализация ТЗ (CRUD, JWT, роли).
+- **v1.1:** Исправления по фидбеку код-ревью (безопасность, структура).
+- **v2.0 (Текущая):** Глубокая оптимизация и рефакторинг:
+  - Устранена проблема N+1 запросов через `select_related` и `list_select_related`.
+  - Применены принципы **SOLID** (SRP, DIP) и **DRY** (универсальные функции сериализации, паттерн Repository для токенов).
+  - Вынесена бизнес-логика в Service Layer (`AuthService`).
+  - Добавлена management-команда `seed_data` для мгновенного развертывания тестового окружения.
 
+## Как запустить проект
+1. Клонируйте репозиторий и создайте виртуальное окружение.
+2. Установите зависимости: `pip install -r requirements.txt`
+3. Настройте переменные окружения в файле `.env`.
+4. Примените миграции: `python manage.py migrate`
+5. **Заполните БД тестовыми данными:** `python manage.py seed_data`
+6. Запустите сервер: `python manage.py runserver`
 
-
-
--POST /logout
-Выход из системы, токен недействителен.
-**Request:**
-Authorization: Bearer <jwt_token>
-**Response:**
-'''json
-{
-   "message" : "Logged out successfully"
-}
-
-
-
-
--GET /profile
-Получение информации о пользователе.
-**Request:**
-Authorization: Bearer <jwt_token>
-**Response:**
-'''json
-{
-  "id" : 1,
-  "first_name" : "Alina",
-  "last_name" : "Ivanova",
-  "email" : "example@exam.com",
-  "is_active" : true
-}
-
-
-
-
--PUT /profile
-Обновление данных профиля.
-**Request:**
-Authorization: Bearer <jwt_token>
-
-'''json
-{
-   "first_name" : "Alice",
-   "last_name" : "Petrovna",
-   "patronymic" : "Ivanova"
-}
-
-**Response:**
-'''json
-{
-   "message" : "Profile updated successfully"
-}
-
-
-
-
-
--DELETE /profile
-Удаление аккаунта (is_active=False)
-**Request:**
-Authorization: Bearer <jwt_token>
-**Response:**
-'''json
-{
-   "message" : "Profile deleted successfully"
-}
-
-
-
-
-
-
-Users
-
-- GET /users/active/ — список активных пользователей
-- GET /users/admin/ — список администраторов
-- GET /users/example/ — пользователи с email @example.com
-- GET /users/recent/ — пользователи, созданные за последние 7 дней
-- GET /users/managers-or-users/ — менеджеры или обычные пользователи
-- GET /users/access-rules/ — правила для роли User
-
-
-
-Access Rules
-- GET /access-rules/ — просмотр правил доступа (только Admin)
-
-
-
-
-Авторизация
-
--User доступ к Orders                              Нет прав на создание, обновление и удаление.
--Manager доступ к своим пользователям              Не может управлять всеми пользователями системы
--Admin полный доступ включая /access-rules/        Нет ограничениий
--Guest только регистрация и логин                  Нет доступа к защищенным эндпоинтам
+> **Тестовые доступы (после seed_data):**
+> - Admin: `admin@example.com` / `admin123`
+> - User: `user@example.com` / `user123`
