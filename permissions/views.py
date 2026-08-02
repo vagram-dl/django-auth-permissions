@@ -1,6 +1,7 @@
 
 
 from .services import AuthService
+from .permissions import IsAdminRole
 from rest_framework.throttling import ScopedRateThrottle
 from django.http import JsonResponse
 from rest_framework.exceptions import PermissionDenied
@@ -143,34 +144,23 @@ def user_access_rules(request):
 
 
 
-class IsAdminRole(permissions.BasePermission):
-    def has_permission(self, request, view):
-        user_role_name = getattr(request.user.role,'name',None)
-        return request.user.is_authenticated and user_role_name == "Admin"
+
 
 class AccessRoleRuleViewSet(viewsets.ModelViewSet):
     serializer_class = AccessRoleRuleSerializer
     permission_classes = [IsAdminRole]
 
     def get_queryset(self):
-        user_role_name = getattr(self.request.user.role,'name',None)
-        if user_role_name == "Admin":
-            return AccessRoleRule.objects.select_related('role','element').all()
-        return AccessRoleRule.objects.none()
+       return AccessRoleRule.objects.select_related('role','element').all()
+
 
     def perform_create(self, serializer):
-        if getattr(self.request.user.role,'name',None) != "Admin":
-            raise PermissionDenied("Forbidden")
         serializer.save()
 
     def perform_update(self, serializer):
-        if getattr(self.request.user.role, 'name', None) != "Admin":
-            raise PermissionDenied("Forbidden")
         serializer.save()
 
     def perform_destroy(self, instance):
-        if getattr(self.request.user.role, 'name', None) != "Admin":
-            raise PermissionDenied("Forbidden")
         instance.delete()
 
 
