@@ -82,9 +82,6 @@ class AccessRuleView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
-        user_role_name = getattr(request.user.role,'name',None)
-        if user_role_name != "Admin":
-            return Response({"error":"Forbidden"},status = status.HTTP_403_FORBIDDEN)
         rules = AccessRoleRule.objects.select_related('role','element').all()
         data = [{
             "role" : r.role.name,
