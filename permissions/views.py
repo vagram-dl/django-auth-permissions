@@ -79,7 +79,7 @@ class LogoutView(APIView):
         return Response(result,status=status.HTTP_200_OK)
 
 class AccessRuleView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminRole]
 
     def get(self,request):
         rules = AccessRoleRule.objects.select_related('role','element').all()
