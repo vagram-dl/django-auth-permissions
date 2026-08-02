@@ -1,5 +1,8 @@
+from tkinter.font import names
+
 from django.core.management.base import BaseCommand
 from permissions.models import User,BusinessElement,AccessRoleRule,Role
+from permissions.factories import UserFactory
 
 class Command(BaseCommand):
     help = "Заполняет базу тестовыми данными"
@@ -9,52 +12,53 @@ class Command(BaseCommand):
         admin_role, _ = Role.objects.get_or_create(name="Admin")
         user_role, _ = Role.objects.get_or_create(name="User")
         guest_role, _ = Role.objects.get_or_create(name="Guest")
-        self.stdout.write("Роли созданы")
+        self.stdout.write("Создание тестовых пользователей...")
 
-        admin_user, _ = User.objects.get_or_create(
+        UserFactory.create_user(
             email="admin@example.com",
-            defaults={"first_name": "Admin", "last_name": "User", "is_active": True, "role": admin_role}
+            password="admin123",
+            role_name="Admin",
+            first_name="Главный",
+            last_name="Админ"
         )
-        admin_user.set_password("admin123")
-        admin_user.save()
 
-        normal_user, _ = User.objects.get_or_create(
+
+        UserFactory.create_user(
             email="user@example.com",
-            defaults={"first_name": "Normal", "last_name": "User", "is_active": True, "role": user_role}
-        )
-        normal_user.set_password("user123")
-        normal_user.save()
-
-        guest_user, _ = User.objects.get_or_create(
-            email="guest@example.com",
-            defaults={"first_name": "Guest", "last_name": "User", "is_active": True, "role": guest_role}
+            password="user123",
+            role_name="User",
+            first_name="Обычный",
+            last_name="Пользователь"
         )
 
-        guest_user.set_password("guest123")
-        guest_user.save()
-        self.stdout.write("Пользователи созданы")
+        orders_element, _ = BusinessElement.objects.get_or_create(name='Orders')
+        users_element, _ = BusinessElement.objects.get_or_create(name='Users')
 
-        shop, _ = BusinessElement.objects.get_or_create(name="Магазин", defaults={"owner": admin_user})
-        product, _ = BusinessElement.objects.get_or_create(name="Товар", defaults={"owner": normal_user})
-        order, _ = BusinessElement.objects.get_or_create(name="Заказ", defaults={"owner": normal_user})
-        self.stdout.write("Бизнес-элементы созданы")
         AccessRoleRule.objects.get_or_create(
-            role=admin_role, element=shop,
-            defaults={"update_all_permission": True}
-        )
-        AccessRoleRule.objects.get_or_create(
-            role=user_role, element=product,
-            defaults={"update_all_permission": False}
-        )
-        AccessRoleRule.objects.get_or_create(
-            role=guest_role, element=order,
-            defaults={"update_all_permission": False}
+            role = admin_role,
+            element = orders_element,
+            defaults={
+                'read_permission': True,
+                'create_permission': True,
+                'update_permission': True,
+                'update_all_permission': True,
+                'delete_permission': True,
+                'delete_all_permission': True
+            }
         )
 
-        self.stdout.write("Правила доступа созданы")
+        AccessRoleRule.objects.get_or_create(
+            role=user_role,
+            element=orders_element,
+            defaults={
+                'read_permission': True,
+                'create_permission': False,
+                'update_permission': False,
+                'update_all_permission': False,
+                'delete_permission': False,
+                'delete_all_permission': False
+            }
+        )
 
-        self.stdout.write(self.style.SUCCESS("Тестовые данные успешно добавлены!"))
-        self.stdout.write(self.style.WARNING("Данные для входа:"))
-        self.stdout.write("Admin: admin@example.com / admin123")
-        self.stdout.write("User: user@example.com / user123")
-        self.stdout.write("Guest: guest@example.com / guest123\n")
+        self.stdout.write(self.style.SUCCESS('База данных успешно заполнена тестовыми данными!'))
+        self.stdout.write(self.style.WARNING('Тестовые доступы: admin@example.com / admin123, user@example.com / user123')
