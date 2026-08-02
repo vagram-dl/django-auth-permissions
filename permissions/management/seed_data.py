@@ -61,4 +61,4 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS('База данных успешно заполнена тестовыми данными!'))
-        self.stdout.write(self.style.WARNING('Тестовые доступы: admin@example.com / admin123, user@example.com / user123')
+        self.stdout.write(self.style.WARNING('Тестовые доступы: admin@example.com / admin123, user@example.com / user123'))
