@@ -12,7 +12,33 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import sys
 from pathlib import Path
 from decouple import config
+import os
 
+
+
+if os.environ.get('GITHUB_ACTIONS') == 'true':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'auth_db'),
+            'USER': os.environ.get('DB_USER', 'myuser'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'mypassword'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='3306'),
+        }
+    }
 from django.conf.global_settings import AUTH_USER_MODEL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -101,22 +127,9 @@ WSGI_APPLICATION = 'auth_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME'),
-        'USER' : config('DB_USER'),
-        'PASSWORD' : config('DB_PASSWORD'),
-        'HOST' : config('DB_HOST', default='localhost'),
-        'PORT' : config('DB_PORT',default='3306'),
-    }
-}
 
-if 'test' in sys.argv:
-    DATABASES['default'] = {
-        'ENGINE' : 'django.db.backends.sqlite3',
-        'NAME' : ':memory:',
-    }
+
+
 
 
 # Password validation
