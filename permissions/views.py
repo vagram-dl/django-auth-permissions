@@ -1,4 +1,6 @@
+import logging
 
+logger = logging.getLogger(__name__)
 
 from .services import AuthService
 from .permissions import IsAdminRole
@@ -39,11 +41,16 @@ class LoginView(APIView):
     permission_classes = []
 
     def post(self,request):
+        username = request.data.get('username')
+        logger.info(f"Попытка входа пользователя: {username}")
         try:
             result = AuthService.login_user(request.data)
-            return Response(result, status=status.HTTP_200_OK)
+            logger.info(f"Успешный вход пользователя: {username}")
+            return Response(result,status=status.HTTP_200_OK)
         except ValueError as e:
-            return Response({"error" : str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            client_ip = request.META.get('REMOTE_ADDR')
+            logger.warning(f"Неудачная попытка входа для '{username}' с IP: {client_ip}")
+            return Response({"error":str(e)},status=status.HTTP_401_UNAUTHORIZED)
 
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
