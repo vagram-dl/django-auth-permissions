@@ -32,6 +32,7 @@ from permissions.views import (
     active_users,admin_users,example_users,
     recent_users, managers_or_users, user_access_rules
 )
+from drf_spectacular.views import SpectacularAPIView,SpectacularSwaggerView
 
 def home(request):
     return JsonResponse({"message":"Добро пожаловать в API!"})
@@ -62,4 +63,6 @@ urlpatterns = [
     path('users/managers-or-users/', managers_or_users, name = 'managers_or_users'),
     path('users/access-rules/',user_access_rules, name = 'user-access-rules'),
     path('',include(router.urls)),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

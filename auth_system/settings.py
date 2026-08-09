@@ -61,6 +61,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 AUTH_USER_MODEL = 'permissions.User'
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES' : [
         'permissions.authentication.JWTAuthentication',
     ],
@@ -89,6 +90,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'users',
     'permissions',
 ]
@@ -203,4 +205,11 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE' : 'Django Auth Permissions API',
+    'DESCRIPTION' : 'API для системы аутентификации и управления правами доступа',
+    'VERSION' : '1.0.0',
+    'SERVE_INCLUDE_SCHEMA' : False,
 }
