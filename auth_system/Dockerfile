@@ -16,4 +16,4 @@ RUN pip install --upgrade pip \
 
 COPY . .
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "auth_system.wsgi:application"]
