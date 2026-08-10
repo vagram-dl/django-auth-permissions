@@ -191,6 +191,7 @@ LOGGING = {
             'class' : 'logging.FileHandler',
             'filename': 'auth_system.log',
             'formatter': 'verbose',
+            'encoding' : 'utf-8',
         },
     },
     'loggers' : {

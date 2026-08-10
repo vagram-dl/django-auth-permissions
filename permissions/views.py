@@ -22,6 +22,7 @@ from django.conf import settings
 from permissions.models import User, AccessRoleRule, JWT
 from .serializers import RegisterSerializer, UserSerializer, LoginSerializer, AccessRoleRuleSerializer
 from rest_framework import viewsets, permissions
+from drf_spectacular.utils import extend_schema
 
 
 
@@ -40,16 +41,25 @@ class LoginView(APIView):
     throttle_scope = 'login'
     permission_classes = []
 
+    @extend_schema(
+        request=LoginSerializer,
+        responses={
+            200: "Успешный вход (возвращает токен)",
+            401: "Неверные учетные данные"
+        }
+    )
+
     def post(self,request):
         username = request.data.get('username')
-        logger.info(f"Попытка входа пользователя: {username}")
+        user_id = request.data.get('username') or request.data.get('email') or 'unknown_user'
+        logger.info(f"Попытка входа пользователя: {user_id}")
         try:
             result = AuthService.login_user(request.data)
-            logger.info(f"Успешный вход пользователя: {username}")
+            logger.info(f"Успешный вход пользователя: {user_id}")
             return Response(result,status=status.HTTP_200_OK)
         except ValueError as e:
             client_ip = request.META.get('REMOTE_ADDR')
-            logger.warning(f"Неудачная попытка входа для '{username}' с IP: {client_ip}")
+            logger.warning(f"Неудачная попытка входа для '{user_id}' с IP: {client_ip}")
             return Response({"error":str(e)},status=status.HTTP_401_UNAUTHORIZED)
 
 class ProfileView(generics.RetrieveAPIView):
